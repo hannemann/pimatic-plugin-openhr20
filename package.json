@@ -1,24 +1,24 @@
-{ "name": "pimatic-plugin-template",
+{ "name": "pimatic-plugin-openhr20",
   "description": "The plugin description",
-  "author": "Your Name <you@example.com> (http://your-website)",
-  "main": "my-plugin",
+  "author": "hannemann",
+  "main": "openhr20",
   "files": [
-    "my-plugin.coffee",
+    "openhr20.coffee",
     "README.md",
-    "my-plugin-config-schema.coffee"
+    "openhr20-config-schema.coffee"
   ],
-  "version": "0.8.0",
-  "homepage": "http://your-plugin-website",
+  "version": "0.9.0",
+  "homepage": "",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git://github.com/pimatic/pimatic-plugin-template.git"
+    "url": "git://github.com/hannemann/pimatic-plugin-template.git"
   },
-  "configSchema": "my-plugin-config-schema.coffee",
+  "configSchema": "openhr20-config-schema.coffee",
   "dependencies": {
   },
   "peerDependencies": {
-    "pimatic": "0.8.*"
+    "pimatic": "0.9.*"
   },
   "engines": {
     "node": ">0.8.x",

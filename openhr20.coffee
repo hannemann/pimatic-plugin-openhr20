@@ -18,7 +18,7 @@ module.exports = (env) ->
   Promise = env.require 'bluebird'
 
   # Require the [cassert library](https://github.com/rhoot/cassert).
-  assert = env.require 'cassert'
+#  assert = env.require 'cassert'
 
   # Include you own depencies with nodes global require function:
   #  
@@ -27,7 +27,7 @@ module.exports = (env) ->
 
   # ###MyPlugin class
   # Create a class that extends the Plugin class and implements the following functions:
-  class MyPlugin extends env.plugins.Plugin
+  class Openhr20 extends env.plugins.Plugin
 
     # ####init()
     # The `init` function is called by the framework to ask your plugin to initialise.
@@ -44,6 +44,6 @@ module.exports = (env) ->
 
   # ###Finally
   # Create a instance of my plugin
-  myPlugin = new MyPlugin
+  openhr20 = new Openhr20
   # and return it to the framework.
-  return myPlugin
+  return openhr20
