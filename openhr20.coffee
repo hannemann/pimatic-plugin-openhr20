@@ -18,12 +18,11 @@ module.exports = (env) ->
   Promise = env.require 'bluebird'
 
   # Require the [cassert library](https://github.com/rhoot/cassert).
-#  assert = env.require 'cassert'
+  assert = env.require 'cassert'
 
   # Include you own depencies with nodes global require function:
   #  
-  #     someThing = require 'someThing'
-  #  
+  sqlite3 = require('sqlite3')
 
   # ###MyPlugin class
   # Create a class that extends the Plugin class and implements the following functions:
@@ -40,7 +39,27 @@ module.exports = (env) ->
     #     
     # 
     init: (app, @framework, @config) =>
+      env.logger.info("database filename '#{@config.database}'")
+      if @config.database
+        @initDatabase()
+        env.logger.info(@db)
+        @getValves()
+      else
+        env.logger.info("Please specify database filename")
       env.logger.info("Hello World")
+
+    initDatabase: () ->
+      @db = new sqlite3.Database(@config.database)
+
+    getValves: () ->
+      sql = 'select * from log where id in (select id from log order by id desc, addr limit 200) group by addr order by addr;'
+      @db.each(sql, @logValve)
+      @
+
+    logValve: (err, row) ->
+      if not err
+        env.logger.info(row.addr)
+      @
 
   # ###Finally
   # Create a instance of my plugin

@@ -16,6 +16,7 @@
   },
   "configSchema": "openhr20-config-schema.coffee",
   "dependencies": {
+    "sqlite3": "3.1.*"
   },
   "peerDependencies": {
     "pimatic": "0.9.*"
