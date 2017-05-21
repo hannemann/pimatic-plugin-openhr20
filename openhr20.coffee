@@ -1,13 +1,4 @@
-# #Plugin template
 
-# This is an plugin template and mini tutorial for creating pimatic plugins. It will explain the 
-# basics of how the plugin system works and how a plugin should look like.
-
-# ##The plugin code
-
-# Your plugin must export a single function, that takes one argument and returns a instance of
-# your plugin class. The parameter is an envirement object containing all pimatic related functions
-# and classes. See the [startup.coffee](http://sweetpi.de/pimatic/docs/startup.html) for details.
 module.exports = (env) ->
 
   Promise = env.require 'bluebird'
@@ -23,10 +14,9 @@ module.exports = (env) ->
     #     
     # 
     init: (app, @framework, @config) =>
-      env.logger.info("Hello World")
 
       @db = new sqlite3.Database(@config.database)
-      @db.on("error", (err) -> env.logger.error("Openhr20: Database error occured"))
+      @db.on("error", @dbErrorHandler.bind(this))
       @devices = {}
       @deviceAddrs = []
       
@@ -46,7 +36,10 @@ module.exports = (env) ->
     getAttributes: () ->
       limit = @deviceAddrs.length
       addr = @deviceAddrs.join(',')
-      sql = "SELECT * FROM log 
+      sql = "SELECT *,
+            NOT EXISTS
+              (SELECT * FROM command_queue WHERE addr = log.addr) synced
+            FROM log 
             WHERE addr IN (#{addr})
             AND id IN (
               select id from log
@@ -59,8 +52,11 @@ module.exports = (env) ->
     updateAttributes: (err, rows) ->
       if not err
         for row in rows
-          @devices[row.addr].updateAttributes(row)
+          @devices[row.addr].update(row)
       @
+      
+    dbErrorHandler: (err) ->
+      env.logger.error("Openhr20: Database error occured", err)
       
 
   class Openhr20Thermostat extends env.devices.HeatingThermostat
@@ -92,10 +88,10 @@ module.exports = (env) ->
       
       @config.ecoTemp = @config.ecoTemp or 17
       @config.comfyTemp = @config.comfyTemp or 21
-      @boostTemp = 30
+      @boostTemp = 25
       @boostDuration = 2 # minutes
 
-    updateAttributes: (row) ->
+    update: (row) ->
 
       if not @syncValue or @syncValue == 'setPoint'
         switch row.mode
@@ -107,49 +103,50 @@ module.exports = (env) ->
       
       @_setValve(row.valve)
       @_setBattery(row.battery/1000)
-        
-      @_setSynced(@isSynced(row))
+      @_setSynced(row.synced == 1)
+      
+      if @_synced and @_mode == @modes.boost and not @boostTimeout
+        env.logger.info "#{@name}: reset in #{@boostDuration} minutes"
+        @boostTimeout = setTimeout(@resetFromBoost.bind(this), @boostDuration * 60 * 1000)
       
       env.logger.info "#{@name}: #{@_mode}, #{@_temperatureSetpoint}, #{@_valve}%, #{@_synced}"
 
-    isSynced: (row) ->
-      @modeSynced(row.mode) and @setPointSynced(row.wanted/100)
-      
-    modeSynced: (mode) ->
-      mode.toLowerCase() == @_mode or @_mode == @modes.boost and mode.toLowerCase() == @modes.manu
-      
-    setPointSynced: (setPoint) ->
-      setPoint == @_temperatureSetpoint
-
     changeModeTo: (mode) ->
-      env.logger.info mode
+      
+      if @isValidMode(mode)
     
-      if not @_synced
-        oldMode = @_mode
+        if not @_synced
+          oldMode = @_mode
+          @_setMode mode
+          @_setMode oldMode
+          env.logger.info("#{@name}: Current command pending...")
+          return Promise.reject
+          
+        env.logger.info("#{@name}: set mode '#{mode}'")
+        
+        if @_mode is mode then return Promise.resolve true
+        
+        if mode == @modes.boost
+          @setBoostMode()
+        else
+          @cancelBoostMode()
+          @writeMode mode
+          
         @_setMode mode
-        @_setMode oldMode
-        env.logger.info("Openhr20: Current command pending...")
-        return Promise.reject
-      env.logger.info("Set mode: #{mode} on #{@name}")
-      if @_mode is mode then return Promise.resolve true
-      if mode is @modes.auto or @modes.manu
-        if @boostTimeout
-          clearTimeout(@boostTimeout)
-          @boostTimeout = undefined
-        @_setMode mode
-        @writeMode mode
         @syncValue = 'mode'
         @getStatus()
         @_setSynced false
-      if mode is @modes.boost
-        @modeBeforeBoost = @_mode
-        @setPointBeforeBoost = @_temperatureSetpoint
-        @_setMode @modes.boost
-        @writeMode @modes.manu
-        @writeTemperature(@getParsedTemperature(@boostTemp))
-        @getStatus()
-        @boostTimeout = setTimeout(@resetFromBoost.bind(this), @boostDuration * 60 * 1000)
-      return Promise.resolve true
+        return Promise.resolve true
+        
+      return Promise.reject
+      
+    setBoostMode: () ->
+      @modeBeforeBoost = @_mode
+      @setPointBeforeBoost = @_temperatureSetpoint
+      @writeTemperature(@getParsedTemperature(@boostTemp))
+      
+    isValidMode: (mode) ->
+      mode == @modes.auto or mode == @modes.manu or mode = @modes.boost
 
     writeMode: (mode) ->
       time = @getTime()
@@ -166,22 +163,21 @@ module.exports = (env) ->
         oldTemp = @_temperatureSetpoint
         @_setSetpoint temperatureSetpoint
         @_setSetpoint oldTemp
-        env.logger.info("Openhr20: Current command pending...")
+        env.logger.info("#{@name}: Current command pending...")
         return Promise.reject
-      env.logger.info("Set temperature: #{temperatureSetpoint} on #{@name}")
+      env.logger.info("#{@name}: set #{temperatureSetpoint}°")
       if temp = @getParsedTemperature temperatureSetpoint
-        if @boostTimeout
-          clearTimeout(@boostTimeout)
-          @boostTimeout = undefined
+        @cancelBoostMode()
         @_setSetpoint temperatureSetpoint
         @writeTemperature temp
-        @writeMode @modes.manu
+        if @_mode == @modes.auto
+          @_setMode @modes.undef
         @syncValue = 'setPoint'
         @getStatus()
         @_setSynced false
         return Promise.resolve true
       else
-        env.logger.info("Temperature: #{temperatureSetpoint} not within allowed interval")
+        env.logger.info("#{@name}: #{temperatureSetpoint} not within allowed interval")
         return Promise.reject "Temperature not within allowed interval"
 
     getParsedTemperature: (temp) ->
@@ -196,11 +192,21 @@ module.exports = (env) ->
       sql = "INSERT INTO command_queue (addr, time, send, data) VALUES(#{@addr}, #{time}, 0, 'A#{temp}');"
       @db.exec(sql)
       
+    cancelBoostMode: () ->
+      if @boostTimeout
+        clearTimeout(@boostTimeout)
+        @boostTimeout = undefined
+      @
+      
     resetFromBoost: () ->
+      env.logger.info "#{@name}: reset from boost mode"
       @_setMode @modeBeforeBoost
       @writeMode @modeBeforeBoost
       @_setSetpoint @setPointBeforeBoost
       @writeTemperature @getParsedTemperature(@setPointBeforeBoost)
+      @syncValue = 'mode'
+      @_setSynced false
+      @boostTimeout = undefined
       
     getTime: () ->
       parseInt(Date.now() / 1000)
@@ -213,9 +219,5 @@ module.exports = (env) ->
     destroy: () ->
       super()
       
-
-  # ###Finally
-  # Create a instance of my plugin
   openhr20 = new Openhr20
-  # and return it to the framework.
   return openhr20
