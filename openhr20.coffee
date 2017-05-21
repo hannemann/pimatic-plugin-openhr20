@@ -129,13 +129,15 @@ module.exports = (env) ->
       
       @attributes.battery = {
         description: "the battery status"
-        type: "boolean"
+        type: "string"
+        enum: ['ok', 'low', 'empty']
         labels: ["low", 'ok']
         icon:
           noText: true
           mapping: {
-            'icon-battery-filled': false
-            'icon-battery-empty': true
+            'icon-battery-filled': 'ok'
+            'icon-battery-fuel-1': 'low'
+            'icon-battery-empty': 'empty'
           }
       }
       
@@ -159,9 +161,15 @@ module.exports = (env) ->
         @_setSetpoint(row.wanted/100)
       
       @_setValve(row.valve)
-      lowBattery = if (row.error & @errors.BAT_W) or
-                    (row.error & @errors.BAT_E) then true else false
-      @_setBattery(lowBattery)
+      
+      if (row.error & @errors.BAT_E)
+        battery = 'empty'
+      else if (row.error & @errors.BAT_W)
+        battery = 'low'
+      else
+        battery = 'ok'
+
+      @_setBattery(battery)
       @_setSynced(row.synced == 1)
       @_setRealTemperature(row.real/100)
       @_setVoltage(row.battery/1000)
@@ -177,7 +185,7 @@ module.exports = (env) ->
       
       env.logger.debug "#{@name}: #{@_mode}, #{@_temperatureSetpoint},
                         #{@_valve}%, #{@_synced},
-                        #{lowBattery}, #{row.error}"
+                        Battery #{battery}, Error code: #{row.error}"
 
     getRealTemperature: () -> Promise.resolve(@_realTemperature)
     getVoltage: () -> Promise.resolve(@_voltage)
