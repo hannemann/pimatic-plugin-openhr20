@@ -11,6 +11,7 @@ module.exports = (env) ->
 
       @db = new sqlite3.Database(@config.database)
       @db.on("error", @dbErrorHandler.bind(this))
+      @update_interval = @config.update_interval
       @devices = {}
       @deviceAddrs = []
       
@@ -32,7 +33,7 @@ module.exports = (env) ->
           env.logger.warn "your plugin could not find the mobile-frontend. No gui will be available"
           
       @getAttributes()
-      @updateInterval = setInterval(@getAttributes.bind(this), 15000)
+      @updateInterval = setInterval(@getAttributes.bind(this), @update_interval)
       
     addDevice: (device) ->
       @devices[device.addr] = device
@@ -93,8 +94,9 @@ module.exports = (env) ->
       @id = @config.id
       @name = @config.name
       @addr = @config.addr
-      @sync_devices = @config.sync_devices.split(',').map((v) -> v.replace /^\s+|\s+$/g, "").filter((v) -> v != '')
-      env.logger.debug(@sync_devices)
+      @sync_devices = @config.sync_devices.split(',')
+                        .map((v) -> v.replace /^\s+|\s+$/g, "")
+                        .filter((v) -> v != '')
       @db = @plugin.db
       
       @attributes.realTemperature = {
@@ -143,8 +145,8 @@ module.exports = (env) ->
       
       @config.ecoTemp = @config.ecoTemp or 17
       @config.comfyTemp = @config.comfyTemp or 21
-      @boostTemp = 30
-      @boostDuration = 5 # minutes
+      @boostTemp = @plugin.config.boost_temperature
+      @boostDuration = @plugin.config.boost_duration # minutes
 
     update: (row) ->
 
