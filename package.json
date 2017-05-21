@@ -1,18 +1,21 @@
 { "name": "pimatic-plugin-openhr20",
-  "description": "The plugin description",
+  "description": "Pimatic plugin to control openhr20 devices",
   "author": "hannemann",
   "main": "openhr20",
   "files": [
     "openhr20.coffee",
     "README.md",
-    "openhr20-config-schema.coffee"
+    "openhr20-config-schema.coffee",
+    "openhr20-device-config-schema.coffee",
+    "LICENSE",
+    "app/*"
   ],
   "version": "0.9.0",
-  "homepage": "",
-  "private": true,
+  "homepage": "https://github.com/OpenHR20",
+  "private": false,
   "repository": {
     "type": "git",
-    "url": "git://github.com/hannemann/pimatic-plugin-template.git"
+    "url": "git://github.com/hannemann/pimatic-plugin-openhr20.git"
   },
   "configSchema": "openhr20-config-schema.coffee",
   "dependencies": {
