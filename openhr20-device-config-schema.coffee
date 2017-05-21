@@ -38,4 +38,12 @@ module.exports = {
         description: "Show the battery status in the GUI"
         type: "boolean"
         default: true
+      guiShowVoltage:
+        description: "Show the voltage of batteries in the GUI"
+        type: "boolean"
+        default: true
+      guiShowError:
+        description: "Show the error in the GUI"
+        type: "boolean"
+        default: true
 }

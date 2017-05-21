@@ -1,3 +1,6 @@
 li.thermostat.openhr20.unsynced {
   opacity: .3;
 }
+li.thermostat span.error {
+  color: red;
+}

@@ -84,6 +84,8 @@ module.exports = (env) ->
     template: "openhr20-thermostat"
     
     _realTemperature: null
+    _voltage: null
+    _error: null
 
     constructor: (@config, lastState, @plugin) ->
       @id = @config.id
@@ -96,6 +98,20 @@ module.exports = (env) ->
         description: "The real temperature"
         type: "string"
         acronym: "T"
+      }
+      
+      @attributes.voltage = {
+        label: "Voltage"
+        description: "The battery voltage"
+        type: "string"
+        acronym: "V"
+      }
+      
+      @attributes.error = {
+        label: "Error"
+        description: "The error"
+        type: "string"
+        acronym: ""
       }
       
       @attributes.battery = {
@@ -135,6 +151,8 @@ module.exports = (env) ->
       @_setBattery(lowBattery)
       @_setSynced(row.synced == 1)
       @_setRealTemperature(row.real/100)
+      @_setVoltage(row.battery/1000)
+      @_setError(row.error)
       
       if @_synced and @_mode == @modes.boost and not @boostTimeout
         env.logger.info "#{@name}: reset in #{@boostDuration} minutes"
@@ -148,6 +166,8 @@ module.exports = (env) ->
                         #{lowBattery}, #{row.error}"
 
     getRealTemperature: () -> Promise.resolve(@_realTemperature)
+    getVoltage: () -> Promise.resolve(@_voltage)
+    getError: () -> Promise.resolve(@_error)
 
     _setRealTemperature: (realTemperature) ->
       realTemperature = realTemperature.toFixed(2)
@@ -155,6 +175,31 @@ module.exports = (env) ->
       if @_realTemperature is realTemperature then return
       @_realTemperature = realTemperature
       @emit 'realTemperature', realTemperature
+
+    _setVoltage: (voltage) ->
+      voltage = voltage.toFixed(2)
+      voltage = "#{voltage}"
+      if @_voltage is voltage then return
+      @_voltage = voltage
+      @emit 'voltage', voltage
+      
+    _setError: (error) ->
+      if @_error is error then return
+      if error & @errors.MONTAGE
+        error = "Montage"
+      else if error & @errors.MOTOR
+        error = "Motor"
+      else if error & @errors.RFM_SYNC
+        error = "RFM sync"
+      else if error & @errors.BAT_W
+        error = "Bat. warn"
+      else if error & @errors.BAT_E
+        error = "Bat. low"
+      else 
+        error = ""
+        
+      @_error = error
+      @emit 'error', error
 
     changeModeTo: (mode) ->
       
