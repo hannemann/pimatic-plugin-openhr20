@@ -21,7 +21,7 @@ module.exports = (env) ->
         createCallback: (deviceConfig, lastState) => new Openhr20Thermostat(deviceConfig, lastState, this)
       })
       
-      @updateInterval = setInterval(@getAttributes.bind(this), 5000)
+      @updateInterval = setInterval(@getAttributes.bind(this), 15000)
       
       @framework.on "after init", =>
         # Check if the mobile-frontent was loaded and get a instance
@@ -140,8 +140,8 @@ module.exports = (env) ->
       
       @config.ecoTemp = @config.ecoTemp or 17
       @config.comfyTemp = @config.comfyTemp or 21
-      @boostTemp = 25
-      @boostDuration = 2 # minutes
+      @boostTemp = 30
+      @boostDuration = 5 # minutes
 
     update: (row) ->
 
