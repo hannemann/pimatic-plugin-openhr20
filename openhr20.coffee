@@ -29,6 +29,16 @@ module.exports = (env) ->
       
       @updateInterval = setInterval(@getAttributes.bind(this), 5000)
       
+      @framework.on "after init", =>
+        # Check if the mobile-frontent was loaded and get a instance
+        mobileFrontend = @framework.pluginManager.getPlugin 'mobile-frontend'
+        if mobileFrontend?
+          mobileFrontend.registerAssetFile 'js', "pimatic-plugin-openhr20/app/js/openhr20-thermostat.coffee"
+          #mobileFrontend.registerAssetFile 'css', "pimatic-your-plugin/app/css/some-css.css"
+          mobileFrontend.registerAssetFile 'html', "pimatic-plugin-openhr20/app/views/openhr20-thermostat.jade"
+        else
+          env.logger.warn "your plugin could not find the mobile-frontend. No gui will be available"
+      
     addDevice: (device) ->
       @devices[device.addr] = device
       @deviceAddrs.push(device.addr)
@@ -61,21 +71,23 @@ module.exports = (env) ->
 
   class Openhr20Thermostat extends env.devices.HeatingThermostat
   
-    error_mask:
-      0x01: "NA1"
-      0x02: "NA2"
-      0x04: "MONTAGE"
-      0x08: "MOTOR"
-      0x10: "RFM_SYNC"
-      0x20: "NA5"
-      0x40: "BAT_W"
-      0x80: "BAT_E"
+    errors:
+      "NA1"       : 0x01
+      "NA2"       : 0x02
+      "MONTAGE"   : 0x04
+      "MOTOR"     : 0x08
+      "RFM_SYNC"  : 0x10
+      "NA5"       : 0x20
+      "BAT_W"     : 0x40
+      "BAT_E"     : 0x80
       
     modes:
       manu: "manu"
       auto: "auto"
       boost: "boost"
       undef: "-"
+      
+    template: "openhr20-thermostat"
 
     constructor: (@config, lastState, @plugin) ->
       @id = @config.id
@@ -90,6 +102,18 @@ module.exports = (env) ->
       @config.comfyTemp = @config.comfyTemp or 21
       @boostTemp = 25
       @boostDuration = 2 # minutes
+      
+      @attributes.battery = {
+        description: "the battery status"
+        type: "boolean"
+        labels: ["low", 'ok']
+        icon:
+          noText: true
+          mapping: {
+            'icon-battery-filled': false
+            'icon-battery-empty': true
+          }
+      }
 
     update: (row) ->
 
@@ -102,14 +126,18 @@ module.exports = (env) ->
         @_setSetpoint(row.wanted/100)
       
       @_setValve(row.valve)
-      @_setBattery(row.battery/1000)
+      
+      lowBattery = if (row.error & @errors.BAT_W) or (row.error & @errors.BAT_E) then 'low' else 'ok'
+      lowBattery = if (row.error & @errors.BAT_W) or (row.error & @errors.BAT_E) then true else false
+      
+      @_setBattery(lowBattery)
       @_setSynced(row.synced == 1)
       
       if @_synced and @_mode == @modes.boost and not @boostTimeout
         env.logger.info "#{@name}: reset in #{@boostDuration} minutes"
         @boostTimeout = setTimeout(@resetFromBoost.bind(this), @boostDuration * 60 * 1000)
       
-      env.logger.info "#{@name}: #{@_mode}, #{@_temperatureSetpoint}, #{@_valve}%, #{@_synced}"
+      env.logger.info "#{@name}: #{@_mode}, #{@_temperatureSetpoint}, #{@_valve}%, #{@_synced}, #{lowBattery}, #{row.error}"
 
     changeModeTo: (mode) ->
       

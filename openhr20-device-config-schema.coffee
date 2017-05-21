@@ -30,4 +30,8 @@ module.exports = {
         description: "Show the temperature input spinbox in the GUI"
         type: "boolean"
         default: true
+      guiShowBatteryState:
+        description: "Show the battery status in the GUI"
+        type: "boolean"
+        default: true
 }
