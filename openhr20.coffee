@@ -28,7 +28,7 @@ module.exports = (env) ->
         mobileFrontend = @framework.pluginManager.getPlugin 'mobile-frontend'
         if mobileFrontend?
           mobileFrontend.registerAssetFile 'js', "pimatic-plugin-openhr20/app/js/openhr20-thermostat.coffee"
-          #mobileFrontend.registerAssetFile 'css', "pimatic-your-plugin/app/css/some-css.css"
+          mobileFrontend.registerAssetFile 'css', "pimatic-plugin-openhr20/app/css/openhr20-thermostat.css"
           mobileFrontend.registerAssetFile 'html', "pimatic-plugin-openhr20/app/views/openhr20-thermostat.jade"
         else
           env.logger.warn "your plugin could not find the mobile-frontend. No gui will be available"
@@ -188,20 +188,20 @@ module.exports = (env) ->
     setBoostMode: () ->
       @modeBeforeBoost = @_mode
       @setPointBeforeBoost = @_temperatureSetpoint
-      @writeTemperature(@getParsedTemperature(@boostTemp))
+      @writeTemperature(@getTemperatureCmd(@boostTemp))
       
     isValidMode: (mode) ->
       mode == @modes.auto or mode == @modes.manu or mode = @modes.boost
 
     writeMode: (mode) ->
       time = @getTime()
-      cmd = @getParsedMode(mode)
+      cmd = @getModeCmd(mode)
       sql = "INSERT INTO 
               command_queue (addr, time, send, data)
               VALUES(#{@addr}, #{time}, 0, 'M0#{cmd}');"
       @db.exec(sql)
         
-    getParsedMode: (mode) ->
+    getModeCmd: (mode) ->
       return (if mode is @modes.auto then 1 else 0).toString()
 
     changeTemperatureTo: (temperatureSetpoint) ->
@@ -213,7 +213,7 @@ module.exports = (env) ->
         env.logger.info("#{@name}: Current command pending...")
         return Promise.reject
       env.logger.info("#{@name}: set #{temperatureSetpoint}°")
-      if temp = @getParsedTemperature temperatureSetpoint
+      if temp = @getTemperatureCmd temperatureSetpoint
         @cancelBoostMode()
         @_setSetpoint temperatureSetpoint
         @writeTemperature temp
@@ -228,7 +228,7 @@ module.exports = (env) ->
                         not within allowed interval")
         return Promise.reject "Temperature not within allowed interval"
 
-    getParsedTemperature: (temp) ->
+    getTemperatureCmd: (temp) ->
       temp = parseFloat(temp) * 2
       if 9 < temp < 61
         temp.toString(16)
@@ -253,7 +253,7 @@ module.exports = (env) ->
       @_setMode @modeBeforeBoost
       @writeMode @modeBeforeBoost
       @_setSetpoint @setPointBeforeBoost
-      @writeTemperature @getParsedTemperature(@setPointBeforeBoost)
+      @writeTemperature @getTemperatureCmd(@setPointBeforeBoost)
       @syncValue = 'mode'
       @_setSynced false
       @boostTimeout = undefined
