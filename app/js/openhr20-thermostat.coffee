@@ -74,6 +74,12 @@ $(document).on( "templateinit", (event) ->
             @ecoButton.removeClass('ui-btn-active')
             @comfyButton.removeClass('ui-btn-active')
             @autoButton.removeClass('ui-btn-active')
+          when '-'
+            @manuButton.removeClass('ui-btn-active')
+            @boostButton.removeClass('ui-btn-active')
+            @ecoButton.removeClass('ui-btn-active')
+            @comfyButton.removeClass('ui-btn-active')
+            @autoButton.removeClass('ui-btn-active')
         return
 
       updatePreTemperature: ->
