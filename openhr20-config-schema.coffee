@@ -8,4 +8,8 @@ module.exports = {
       description: "Path to database file"
       type: "string"
       default: ""
+    debug:
+      doc: "Enabled debug messages"
+      type: "boolean"
+      default: false
 }

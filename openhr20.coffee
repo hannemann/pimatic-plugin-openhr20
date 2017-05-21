@@ -6,13 +6,7 @@ module.exports = (env) ->
   sqlite3 = require('sqlite3')
   
   class Openhr20 extends env.plugins.Plugin
-    # #####params:
-    #  * `app` is the [express] instance the framework is using.
-    #  * `framework` the framework itself
-    #  * `config` the properties the user specified as config for your plugin in the `plugins` 
-    #     section of the config.json file 
-    #     
-    # 
+  
     init: (app, @framework, @config) =>
 
       @db = new sqlite3.Database(@config.database)
@@ -100,18 +94,9 @@ module.exports = (env) ->
       @attributes.realTemperature = {
         label: "Real Temperature"
         description: "The real temperature"
-        type: "number"
+        type: "string"
         acronym: "T"
-        unit: "°C"
       }
-      super(@config, lastState)
-      @plugin.addDevice(this)
-      @syncValue = null
-      
-      @config.ecoTemp = @config.ecoTemp or 17
-      @config.comfyTemp = @config.comfyTemp or 21
-      @boostTemp = 25
-      @boostDuration = 2 # minutes
       
       @attributes.battery = {
         description: "the battery status"
@@ -124,6 +109,15 @@ module.exports = (env) ->
             'icon-battery-empty': true
           }
       }
+      
+      super(@config, lastState)
+      @plugin.addDevice(this)
+      @syncValue = null
+      
+      @config.ecoTemp = @config.ecoTemp or 17
+      @config.comfyTemp = @config.comfyTemp or 21
+      @boostTemp = 25
+      @boostDuration = 2 # minutes
 
     update: (row) ->
 
@@ -136,26 +130,31 @@ module.exports = (env) ->
         @_setSetpoint(row.wanted/100)
       
       @_setValve(row.valve)
-      
-      lowBattery = if (row.error & @errors.BAT_W) or (row.error & @errors.BAT_E) then 'low' else 'ok'
-      lowBattery = if (row.error & @errors.BAT_W) or (row.error & @errors.BAT_E) then true else false
-      
+      lowBattery = if (row.error & @errors.BAT_W) or
+                    (row.error & @errors.BAT_E) then true else false
       @_setBattery(lowBattery)
       @_setSynced(row.synced == 1)
       @_setRealTemperature(row.real/100)
       
       if @_synced and @_mode == @modes.boost and not @boostTimeout
         env.logger.info "#{@name}: reset in #{@boostDuration} minutes"
-        @boostTimeout = setTimeout(@resetFromBoost.bind(this), @boostDuration * 60 * 1000)
+        @boostTimeout = setTimeout(
+          @resetFromBoost.bind(this),
+          @boostDuration * 60 * 1000
+        )
       
-      env.logger.info "#{@name}: #{@_mode}, #{@_temperatureSetpoint}, #{@_valve}%, #{@_synced}, #{lowBattery}, #{row.error}"
+      env.logger.debug "#{@name}: #{@_mode}, #{@_temperatureSetpoint},
+                        #{@_valve}%, #{@_synced},
+                        #{lowBattery}, #{row.error}"
 
     getRealTemperature: () -> Promise.resolve(@_realTemperature)
 
     _setRealTemperature: (realTemperature) ->
-        if @_realTemperature is realTemperature then return
-        @_realTemperature = realTemperature
-        @emit 'realTemperature', realTemperature
+      realTemperature = realTemperature.toFixed(2)
+      realTemperature = "#{realTemperature} °C"
+      if @_realTemperature is realTemperature then return
+      @_realTemperature = realTemperature
+      @emit 'realTemperature', realTemperature
 
     changeModeTo: (mode) ->
       
@@ -197,14 +196,16 @@ module.exports = (env) ->
     writeMode: (mode) ->
       time = @getTime()
       cmd = @getParsedMode(mode)
-      sql = "INSERT INTO command_queue (addr, time, send, data) VALUES(#{@addr}, #{time}, 0, 'M0#{cmd}');"
+      sql = "INSERT INTO 
+              command_queue (addr, time, send, data)
+              VALUES(#{@addr}, #{time}, 0, 'M0#{cmd}');"
       @db.exec(sql)
         
     getParsedMode: (mode) ->
       return (if mode is @modes.auto then 1 else 0).toString()
 
     changeTemperatureTo: (temperatureSetpoint) ->
-      env.logger.info temperatureSetpoint
+    
       if not @_synced
         oldTemp = @_temperatureSetpoint
         @_setSetpoint temperatureSetpoint
@@ -223,7 +224,8 @@ module.exports = (env) ->
         @_setSynced false
         return Promise.resolve true
       else
-        env.logger.info("#{@name}: #{temperatureSetpoint} not within allowed interval")
+        env.logger.info("#{@name}: #{temperatureSetpoint}
+                        not within allowed interval")
         return Promise.reject "Temperature not within allowed interval"
 
     getParsedTemperature: (temp) ->
@@ -235,7 +237,9 @@ module.exports = (env) ->
 
     writeTemperature: (temp) ->
       time = @getTime()
-      sql = "INSERT INTO command_queue (addr, time, send, data) VALUES(#{@addr}, #{time}, 0, 'A#{temp}');"
+      sql = "INSERT INTO
+              command_queue (addr, time, send, data)
+              VALUES(#{@addr}, #{time}, 0, 'A#{temp}');"
       @db.exec(sql)
       
     cancelBoostMode: () ->
@@ -259,7 +263,9 @@ module.exports = (env) ->
       
     getStatus: () ->
       time = @getTime()
-      sql = "INSERT INTO command_queue (addr, time, send, data) VALUES(#{@addr}, #{time}, 0, 'D');"
+      sql = "INSERT INTO
+              command_queue (addr, time, send, data)
+              VALUES(#{@addr}, #{time}, 0, 'D');"
       @db.exec(sql)
 
     destroy: () ->
