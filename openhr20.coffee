@@ -78,6 +78,7 @@ module.exports = (env) ->
     modes:
       manu: "manu"
       auto: "auto"
+      boost: "boost"
       undef: "-"
 
     constructor: (@config, lastState, @plugin) ->
@@ -91,8 +92,8 @@ module.exports = (env) ->
       
       @config.ecoTemp = @config.ecoTemp or 17
       @config.comfyTemp = @config.comfyTemp or 21
-      
-      env.logger.info(@config)
+      @boostTemp = 30
+      @boostDuration = 2 # minutes
 
     updateAttributes: (row) ->
 
@@ -115,7 +116,7 @@ module.exports = (env) ->
       @modeSynced(row.mode) and @setPointSynced(row.wanted/100)
       
     modeSynced: (mode) ->
-      mode.toLowerCase() == @_mode
+      mode.toLowerCase() == @_mode or @_mode == @modes.boost and mode.toLowerCase() == @modes.manu
       
     setPointSynced: (setPoint) ->
       setPoint == @_temperatureSetpoint
@@ -132,11 +133,22 @@ module.exports = (env) ->
       env.logger.info("Set mode: #{mode} on #{@name}")
       if @_mode is mode then return Promise.resolve true
       if mode is @modes.auto or @modes.manu
+        if @boostTimeout
+          clearTimeout(@boostTimeout)
+          @boostTimeout = undefined
         @_setMode mode
         @writeMode mode
         @syncValue = 'mode'
         @getStatus()
         @_setSynced false
+      if mode is @modes.boost
+        @modeBeforeBoost = @_mode
+        @setPointBeforeBoost = @_temperatureSetpoint
+        @_setMode @modes.boost
+        @writeMode @modes.manu
+        @writeTemperature(@getParsedTemperature(@boostTemp))
+        @getStatus()
+        @boostTimeout = setTimeout(@resetFromBoost.bind(this), @boostDuration * 60 * 1000)
       return Promise.resolve true
 
     writeMode: (mode) ->
@@ -158,6 +170,9 @@ module.exports = (env) ->
         return Promise.reject
       env.logger.info("Set temperature: #{temperatureSetpoint} on #{@name}")
       if temp = @getParsedTemperature temperatureSetpoint
+        if @boostTimeout
+          clearTimeout(@boostTimeout)
+          @boostTimeout = undefined
         @_setSetpoint temperatureSetpoint
         @writeTemperature temp
         @writeMode @modes.manu
@@ -180,6 +195,12 @@ module.exports = (env) ->
       time = @getTime()
       sql = "INSERT INTO command_queue (addr, time, send, data) VALUES(#{@addr}, #{time}, 0, 'A#{temp}');"
       @db.exec(sql)
+      
+    resetFromBoost: () ->
+      @_setMode @modeBeforeBoost
+      @writeMode @modeBeforeBoost
+      @_setSetpoint @setPointBeforeBoost
+      @writeTemperature @getParsedTemperature(@setPointBeforeBoost)
       
     getTime: () ->
       parseInt(Date.now() / 1000)
