@@ -88,6 +88,11 @@ module.exports = (env) ->
       super(@config, lastState)
       @plugin.addDevice(this)
       @syncValue = null
+      
+      @config.ecoTemp = @config.ecoTemp or 17
+      @config.comfyTemp = @config.comfyTemp or 21
+      
+      env.logger.info(@config)
 
     updateAttributes: (row) ->
 
@@ -116,6 +121,8 @@ module.exports = (env) ->
       setPoint == @_temperatureSetpoint
 
     changeModeTo: (mode) ->
+      env.logger.info mode
+    
       if not @_synced
         oldMode = @_mode
         @_setMode mode
@@ -142,6 +149,7 @@ module.exports = (env) ->
       return (if mode is @modes.auto then 1 else 0).toString()
 
     changeTemperatureTo: (temperatureSetpoint) ->
+      env.logger.info temperatureSetpoint
       if not @_synced
         oldTemp = @_temperatureSetpoint
         @_setSetpoint temperatureSetpoint
