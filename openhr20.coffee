@@ -88,12 +88,22 @@ module.exports = (env) ->
       undef: "-"
       
     template: "openhr20-thermostat"
+    
+    _realTemperature: null
 
     constructor: (@config, lastState, @plugin) ->
       @id = @config.id
       @name = @config.name
       @addr = @config.addr
       @db = @plugin.db
+      
+      @attributes.realTemperature = {
+        label: "Real Temperature"
+        description: "The real temperature"
+        type: "number"
+        acronym: "T"
+        unit: "°C"
+      }
       super(@config, lastState)
       @plugin.addDevice(this)
       @syncValue = null
@@ -132,12 +142,20 @@ module.exports = (env) ->
       
       @_setBattery(lowBattery)
       @_setSynced(row.synced == 1)
+      @_setRealTemperature(row.real/100)
       
       if @_synced and @_mode == @modes.boost and not @boostTimeout
         env.logger.info "#{@name}: reset in #{@boostDuration} minutes"
         @boostTimeout = setTimeout(@resetFromBoost.bind(this), @boostDuration * 60 * 1000)
       
       env.logger.info "#{@name}: #{@_mode}, #{@_temperatureSetpoint}, #{@_valve}%, #{@_synced}, #{lowBattery}, #{row.error}"
+
+    getRealTemperature: () -> Promise.resolve(@_realTemperature)
+
+    _setRealTemperature: (realTemperature) ->
+        if @_realTemperature is realTemperature then return
+        @_realTemperature = realTemperature
+        @emit 'realTemperature', realTemperature
 
     changeModeTo: (mode) ->
       

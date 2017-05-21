@@ -34,4 +34,8 @@ module.exports = {
         description: "Show the battery status in the GUI"
         type: "boolean"
         default: true
+      guiShowRealTemperature:
+        description: "Show the battery status in the GUI"
+        type: "boolean"
+        default: true
 }
