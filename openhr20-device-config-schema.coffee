@@ -46,4 +46,8 @@ module.exports = {
         description: "Show the error in the GUI"
         type: "boolean"
         default: true
+      guiShowWindow:
+        description: "Show the window state in the GUI"
+        type: "boolean"
+        default: true
 }

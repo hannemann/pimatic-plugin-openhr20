@@ -86,6 +86,7 @@ module.exports = (env) ->
     _realTemperature: null
     _voltage: null
     _error: null
+    _window: null
 
     constructor: (@config, lastState, @plugin) ->
       @id = @config.id
@@ -105,6 +106,13 @@ module.exports = (env) ->
         description: "The battery voltage"
         type: "string"
         acronym: "V"
+      }
+      
+      @attributes.window = {
+        label: "Window"
+        description: "The window state"
+        type: "string"
+        acronym: "W"
       }
       
       @attributes.error = {
@@ -153,6 +161,7 @@ module.exports = (env) ->
       @_setRealTemperature(row.real/100)
       @_setVoltage(row.battery/1000)
       @_setError(row.error)
+      @_setWindow(row.window)
       
       if @_synced and @_mode == @modes.boost and not @boostTimeout
         env.logger.info "#{@name}: reset in #{@boostDuration} minutes"
@@ -168,6 +177,7 @@ module.exports = (env) ->
     getRealTemperature: () -> Promise.resolve(@_realTemperature)
     getVoltage: () -> Promise.resolve(@_voltage)
     getError: () -> Promise.resolve(@_error)
+    getWindow: () -> Promise.resolve(@_window)
 
     _setRealTemperature: (realTemperature) ->
       realTemperature = realTemperature.toFixed(2)
@@ -182,6 +192,12 @@ module.exports = (env) ->
       if @_voltage is voltage then return
       @_voltage = voltage
       @emit 'voltage', voltage
+
+    _setWindow: (window) ->
+      window = if window is 1 then "O" else "C"
+      if @_window is window then return
+      @_window = window
+      @emit 'window', window
       
     _setError: (error) ->
       if @_error is error then return

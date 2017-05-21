@@ -4,6 +4,9 @@ script#openhr20-thermostat-template(type='text/template')
     <!-- ko if: $data.getConfig('guiShowError') -->
     span.error(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('error'), afterRender: $data.afterAttributeRender }")
     <!-- /ko -->
+    <!-- ko if: $data.getConfig('guiShowWindow') -->
+    span.voltage(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('window'), afterRender: $data.afterAttributeRender }")
+    <!-- /ko -->
     <!-- ko if: $data.getConfig('guiShowVoltage') -->
     span.voltage(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('voltage'), afterRender: $data.afterAttributeRender }")
     <!-- /ko -->
