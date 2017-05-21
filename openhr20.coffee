@@ -21,8 +21,6 @@ module.exports = (env) ->
         createCallback: (deviceConfig, lastState) => new Openhr20Thermostat(deviceConfig, lastState, this)
       })
       
-      @updateInterval = setInterval(@getAttributes.bind(this), 15000)
-      
       @framework.on "after init", =>
         # Check if the mobile-frontent was loaded and get a instance
         mobileFrontend = @framework.pluginManager.getPlugin 'mobile-frontend'
@@ -32,6 +30,9 @@ module.exports = (env) ->
           mobileFrontend.registerAssetFile 'html', "pimatic-plugin-openhr20/app/views/openhr20-thermostat.jade"
         else
           env.logger.warn "your plugin could not find the mobile-frontend. No gui will be available"
+          
+      @getAttributes()
+      @updateInterval = setInterval(@getAttributes.bind(this), 15000)
       
     addDevice: (device) ->
       @devices[device.addr] = device
@@ -92,6 +93,8 @@ module.exports = (env) ->
       @id = @config.id
       @name = @config.name
       @addr = @config.addr
+      @sync_devices = @config.sync_devices.split(',').map((v) -> v.replace /^\s+|\s+$/g, "").filter((v) -> v != '')
+      env.logger.debug(@sync_devices)
       @db = @plugin.db
       
       @attributes.realTemperature = {
@@ -217,7 +220,11 @@ module.exports = (env) ->
       @_error = error
       @emit 'error', error
 
-    changeModeTo: (mode) ->
+    changeModeTo: (mode, is_origin = true) ->
+      
+      if is_origin
+        for addr in @sync_devices
+          @plugin.devices[addr].changeModeTo(mode, false)
       
       if @isValidMode(mode)
     
@@ -265,7 +272,13 @@ module.exports = (env) ->
     getModeCmd: (mode) ->
       return (if mode is @modes.auto then 1 else 0).toString()
 
-    changeTemperatureTo: (temperatureSetpoint) ->
+    changeTemperatureTo: (temperatureSetpoint, is_origin = true) ->
+      
+      if is_origin
+        for addr in @sync_devices
+          @plugin.devices[addr].changeTemperatureTo(
+            temperatureSetpoint, false
+          )
     
       if not @_synced
         oldTemp = @_temperatureSetpoint

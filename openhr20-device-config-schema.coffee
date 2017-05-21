@@ -6,6 +6,10 @@ module.exports = {
       addr:
         description: "The device address"
         type: "number"
+      sync_devices:
+        description: "The devices to be synced with this device (comma seperated list of addresses)"
+        type: "string",
+        default: ""
       comfyTemp:
         description: "The defined comfy temperature"
         type: "number"
