@@ -10,27 +10,11 @@
 # and classes. See the [startup.coffee](http://sweetpi.de/pimatic/docs/startup.html) for details.
 module.exports = (env) ->
 
-  # ###require modules included in pimatic
-  # To require modules that are included in pimatic use `env.require`. For available packages take 
-  # a look at the dependencies section in pimatics package.json
-
-  # Require the  bluebird promise library
   Promise = env.require 'bluebird'
-
-  # Require the [cassert library](https://github.com/rhoot/cassert).
   assert = env.require 'cassert'
-
-  # Include you own depencies with nodes global require function:
-  #  
   sqlite3 = require('sqlite3')
-
-  # ###MyPlugin class
-  # Create a class that extends the Plugin class and implements the following functions:
+  
   class Openhr20 extends env.plugins.Plugin
-
-    # ####init()
-    # The `init` function is called by the framework to ask your plugin to initialise.
-    #  
     # #####params:
     #  * `app` is the [express] instance the framework is using.
     #  * `framework` the framework itself
@@ -132,6 +116,12 @@ module.exports = (env) ->
       setPoint == @_temperatureSetpoint
 
     changeModeTo: (mode) ->
+      if not @_synced
+        oldMode = @_mode
+        @_setMode mode
+        @_setMode oldMode
+        env.logger.info("Openhr20: Current command pending...")
+        return Promise.reject
       env.logger.info("Set mode: #{mode} on #{@name}")
       if @_mode is mode then return Promise.resolve true
       if mode is @modes.auto or @modes.manu
@@ -152,6 +142,12 @@ module.exports = (env) ->
       return (if mode is @modes.auto then 1 else 0).toString()
 
     changeTemperatureTo: (temperatureSetpoint) ->
+      if not @_synced
+        oldTemp = @_temperatureSetpoint
+        @_setSetpoint temperatureSetpoint
+        @_setSetpoint oldTemp
+        env.logger.info("Openhr20: Current command pending...")
+        return Promise.reject
       env.logger.info("Set temperature: #{temperatureSetpoint} on #{@name}")
       if temp = @getParsedTemperature temperatureSetpoint
         @_setSetpoint temperatureSetpoint
