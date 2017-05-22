@@ -227,6 +227,7 @@ module.exports = (env) ->
       else 
         error = ""
         
+      if @_error is error then return
       @_error = error
       @emit 'error', error
 
