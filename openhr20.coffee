@@ -103,15 +103,17 @@ module.exports = (env) ->
       @attributes.realTemperature = {
         label: "Real Temperature"
         description: "The real temperature"
-        type: "string"
+        type: "number"
         acronym: "T"
+        unit: "°C"
       }
       
       @attributes.voltage = {
         label: "Voltage"
         description: "The battery voltage"
-        type: "string"
-        acronym: "V"
+        type: "number"
+        unit: "V"
+        acronym: ""
       }
       
       @attributes.window = {
@@ -231,15 +233,11 @@ module.exports = (env) ->
       
 
     _setRealTemperature: (realTemperature) ->
-      realTemperature = realTemperature.toFixed(2)
-      realTemperature = "#{realTemperature} °C"
       if @_realTemperature is realTemperature then return
       @_realTemperature = realTemperature
       @emit 'realTemperature', realTemperature
 
     _setVoltage: (voltage) ->
-      voltage = voltage.toFixed(2)
-      voltage = "#{voltage}"
       if @_voltage is voltage then return
       @_voltage = voltage
       @emit 'voltage', voltage

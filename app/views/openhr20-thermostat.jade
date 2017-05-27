@@ -10,11 +10,11 @@ script#openhr20-thermostat-template(type='text/template')
         <!-- ko if: $data.getConfig('guiShowWindow') -->
         span.voltage(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('window'), afterRender: $data.afterAttributeRender }")
         <!-- /ko -->
-        <!-- ko if: $data.getConfig('guiShowVoltage') -->
-        span.voltage(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('voltage'), afterRender: $data.afterAttributeRender }")
-        <!-- /ko -->
         <!-- ko if: $data.getConfig('guiShowBatteryState') -->
         span.battery(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('battery'), afterRender: $data.afterAttributeRender }")
+        <!-- /ko -->
+        <!-- ko if: $data.getConfig('guiShowVoltage') -->
+        span.voltage(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('voltage'), afterRender: $data.afterAttributeRender }")
         <!-- /ko -->
         <!-- ko if: $data.getConfig('guiShowRealTemperature') -->
         span.real-temperature(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('realTemperature'), afterRender: $data.afterAttributeRender }")
