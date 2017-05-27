@@ -172,10 +172,6 @@ module.exports = (env) ->
         @_setSetpoint(row.wanted/100)
       
       @_setValve(row.valve)
-
-      if row.battery < 2350
-        row.error &= ~@errors.BAT_W
-        row.error |= @errors.BAT_E
         
       @_setBattery(row.battery)
       @_setSynced(row.synced == 1)
