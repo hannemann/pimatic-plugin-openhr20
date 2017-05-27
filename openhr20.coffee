@@ -187,7 +187,7 @@ module.exports = (env) ->
         @_setError(@errors.RFM_SYNC)
         @_setErrorLevel(@errors.BAT_W)
       
-      if Date.now() / 1000 - row.time > 20 * 1
+      if Date.now() / 1000 - row.time > 20 * 60
         @_setError(@errors.RFM_SYNC)
         @_setErrorLevel(@errors.BAT_E)
       
