@@ -179,8 +179,6 @@ module.exports = (env) ->
       @_setVoltage(row.battery/1000)
       @_setWindow(row.window)
       
-      env.logger.debug row.time
-      
       if Date.now() / 1000 - row.time > 20 * 60
         @_setError(@errors.RFM_SYNC)
         @_setErrorLevel(@errors.BAT_E)
