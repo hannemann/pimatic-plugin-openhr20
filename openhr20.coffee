@@ -88,6 +88,7 @@ module.exports = (env) ->
     _realTemperature: null
     _voltage: null
     _error: null
+    _errorlevel: null
     _window: null
 
     constructor: (@config, lastState, @plugin) ->
@@ -127,17 +128,27 @@ module.exports = (env) ->
         acronym: ""
       }
       
+      @attributes.errorLevel = {
+        label: "Errorlevel"
+        description: "The errorlevel"
+        type: "string"
+        acronym: ""
+      }
+      
       @attributes.battery = {
         description: "the battery status"
-        type: "string"
-        enum: ['ok', 'low', 'empty']
-        labels: ["low", 'ok']
+        type: "number"
+        enum: [80, 64, 48, 32, 16, 0]
+        label: ["full", "low"]
         icon:
           noText: true
           mapping: {
-            'icon-battery-filled': 'ok'
-            'icon-battery-fuel-1': 'low'
-            'icon-battery-empty': 'empty'
+            'icon-battery-fuel-5': 100
+            'icon-battery-fuel-4': 80
+            'icon-battery-fuel-3': 64
+            'icon-battery-fuel-2': 48
+            'icon-battery-fuel-1': 32
+            'icon-battery-empty': 16
           }
       }
       
@@ -161,19 +172,17 @@ module.exports = (env) ->
         @_setSetpoint(row.wanted/100)
       
       @_setValve(row.valve)
-      
-      if (row.error & @errors.BAT_E)
-        battery = 'empty'
-      else if (row.error & @errors.BAT_W)
-        battery = 'low'
-      else
-        battery = 'ok'
 
-      @_setBattery(battery)
+      if row.battery < 2350
+        row.error &= ~@errors.BAT_W
+        row.error |= @errors.BAT_E
+        
+      @_setBattery(row.battery)
       @_setSynced(row.synced == 1)
       @_setRealTemperature(row.real/100)
       @_setVoltage(row.battery/1000)
       @_setError(row.error)
+      @_setErrorLevel(row.error)
       @_setWindow(row.window)
       
       if @_synced and @_mode == @modes.boost and not @boostTimeout
@@ -184,13 +193,46 @@ module.exports = (env) ->
         )
       
       env.logger.debug "#{@name}: #{@_mode}, #{@_temperatureSetpoint},
-                        #{@_valve}%, #{@_synced},
-                        Battery #{battery}, Error code: #{row.error}"
+                        #{@_valve}%, #{@_synced}, V: #{row.battery}
+                        Battery #{@_battery}, Error code: #{row.error}, E-Level #{@_errorLevel}, Bat.: #{@config.batteryType}"
 
     getRealTemperature: () -> Promise.resolve(@_realTemperature)
     getVoltage: () -> Promise.resolve(@_voltage)
     getError: () -> Promise.resolve(@_error)
+    getErrorLevel: () -> Promise.resolve(@_errorLevel)
     getWindow: () -> Promise.resolve(@_window)
+    
+    _setBattery: (battery) ->
+      
+      battery /= 1000
+      if @config.batteryType is "rechargeable"
+        if battery > 2.6
+          battery = 100
+        else if battery > 2.5
+          battery = 80
+        else if battery > 2.45
+          battery = 64
+        else if battery > 2.4
+          battery = 48
+        else if battery > 2.35
+          battery = 32
+        else
+          battery = 16
+      else
+        if battery > 2.8333333
+          battery = 100
+        else if battery > 2.6666666
+          battery = 80
+        else if battery > 2.5
+          battery = 64
+        else if battery > 2.33333333
+          battery = 48
+        else if battery > 2.16666666
+          battery = 32
+        else
+          battery = 16
+      super(battery)
+      
 
     _setRealTemperature: (realTemperature) ->
       realTemperature = realTemperature.toFixed(2)
@@ -227,9 +269,23 @@ module.exports = (env) ->
       else 
         error = ""
         
-      if @_error is error then return
       @_error = error
       @emit 'error', error
+      
+      
+    _setErrorLevel: (error) ->
+      if @_error is error then return
+      if error > 0 
+        if error & @errors.BAT_W
+          errorLevel = "warn"
+        else
+          errorLevel = "error"
+      else 
+        errorLevel = ""
+        
+      if @_errorLevel is errorLevel then return
+      @_errorLevel = errorLevel
+      @emit 'errorLevel', errorLevel
 
     changeModeTo: (mode, is_origin = true) ->
       

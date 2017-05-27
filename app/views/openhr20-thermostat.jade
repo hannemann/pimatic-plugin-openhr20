@@ -1,40 +1,44 @@
 script#openhr20-thermostat-template(type='text/template')
   li.sortable.device.no-header.thermostat.openhr20(data-bind='css: {unsynced: !$data.synced()}')
     label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
-    <!-- ko if: $data.getConfig('guiShowError') -->
-    span.error(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('error'), afterRender: $data.afterAttributeRender }")
-    <!-- /ko -->
-    <!-- ko if: $data.getConfig('guiShowWindow') -->
-    span.voltage(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('window'), afterRender: $data.afterAttributeRender }")
-    <!-- /ko -->
-    <!-- ko if: $data.getConfig('guiShowVoltage') -->
-    span.voltage(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('voltage'), afterRender: $data.afterAttributeRender }")
-    <!-- /ko -->
-    <!-- ko if: $data.getConfig('guiShowBatteryState') -->
-    span.battery(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('battery'), afterRender: $data.afterAttributeRender }")
-    <!-- /ko -->
-    <!-- ko if: $data.getConfig('guiShowRealTemperature') -->
-    span.real-temperature(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('realTemperature'), afterRender: $data.afterAttributeRender }")
-    <!-- /ko -->
-    <!-- ko if: $data.getConfig('guiShowValvePosition')  -->
-    .valve-position
-      .valve-position-bar!='&nbsp'
-    <!-- /ko -->
-    .controls.no-carousel-slide
-      <!-- ko if: $data.getConfig('guiShowModeControl')  -->
-      .button-control.ui-controlgroup.ui-controlgroup-horizontal.ui-corner-all.ui-mini.no-carousel-slide(data-role='controlgroup', data-type='horizontal', data-mini='true', data-enhanced='true')
-        .ui-controlgroup-controls
-          a.ui-first-child.ui-btn.ui-corner-all(name='autoButton', data-bind='click: modeAuto') auto
-          a.ui-btn.ui-corner-all(name='manuButton', data-bind='click: modeManu') manu    
-          a.ui-last-child.ui-btn.ui-corner-all(name='boostButton', data-bind='click: modeBoost') boost
+    .openhr20-container
+      <!-- ko if: $data.getConfig('guiShowError') || $data.getConfig('guiShowWindow') || $data.getConfig('guiShowVoltage') || $data.getConfig('guiShowBatteryState') || $data.getConfig('guiShowRealTemperature') -->
+      .openhr20-info
+        <!-- ko if: $data.getConfig('guiShowError') -->
+        span.hint(data-bind="css: $data.device.getAttribute('errorLevel').value, template: {name: 'attribute-template', data: $data.device.getAttribute('error'), afterRender: $data.afterAttributeRender }")
+        <!-- /ko -->
+        <!-- ko if: $data.getConfig('guiShowWindow') -->
+        span.voltage(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('window'), afterRender: $data.afterAttributeRender }")
+        <!-- /ko -->
+        <!-- ko if: $data.getConfig('guiShowVoltage') -->
+        span.voltage(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('voltage'), afterRender: $data.afterAttributeRender }")
+        <!-- /ko -->
+        <!-- ko if: $data.getConfig('guiShowBatteryState') -->
+        span.battery(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('battery'), afterRender: $data.afterAttributeRender }")
+        <!-- /ko -->
+        <!-- ko if: $data.getConfig('guiShowRealTemperature') -->
+        span.real-temperature(data-bind="template: {name: 'attribute-template', data: $data.device.getAttribute('realTemperature'), afterRender: $data.afterAttributeRender }")
+        <!-- /ko -->
       <!-- /ko -->
-      <!-- ko if: $data.getConfig('guiShowPresetControl')  -->
-      .button-control.ui-controlgroup.ui-controlgroup-horizontal.ui-corner-all.ui-mini.no-carousel-slide(data-role='controlgroup', data-type='horizontal', data-mini='true', data-enhanced='true')
-        .ui-controlgroup-controls
-          a.ui-first-child.ui-btn.ui-corner-all(name='ecoButton', data-bind='click: modeEco') eco      
-          a.ui-last-child.ui-btn.ui-corner-all(name='comfyButton', data-bind='click: modeComfy') comfy
-      <!-- /ko -->
-      <!-- ko if: $data.getConfig('guiShowTemperatureInput') -->
-      .spinbox.no-carousel-slide
-        input(type='text', data-role='spinbox', name='spin', value='0', min='0', max='100', data-mini='true', step='0.5', data-bind='textInput: inputValue')
-      <!-- /ko -->
+      .controls.no-carousel-slide
+        <!-- ko if: $data.getConfig('guiShowValvePosition')  -->
+        .valve-position
+          .valve-position-bar!='&nbsp'
+        <!-- /ko -->
+        <!-- ko if: $data.getConfig('guiShowModeControl')  -->
+        .button-control.ui-controlgroup.ui-controlgroup-horizontal.ui-corner-all.ui-mini.no-carousel-slide(data-role='controlgroup', data-type='horizontal', data-mini='true', data-enhanced='true')
+          .ui-controlgroup-controls
+            a.ui-first-child.ui-btn.ui-corner-all(name='autoButton', data-bind='click: modeAuto') auto
+            a.ui-btn.ui-corner-all(name='manuButton', data-bind='click: modeManu') manu    
+            a.ui-last-child.ui-btn.ui-corner-all(name='boostButton', data-bind='click: modeBoost') boost
+        <!-- /ko -->
+        <!-- ko if: $data.getConfig('guiShowPresetControl')  -->
+        .button-control.ui-controlgroup.ui-controlgroup-horizontal.ui-corner-all.ui-mini.no-carousel-slide(data-role='controlgroup', data-type='horizontal', data-mini='true', data-enhanced='true')
+          .ui-controlgroup-controls
+            a.ui-first-child.ui-btn.ui-corner-all(name='ecoButton', data-bind='click: modeEco') eco      
+            a.ui-last-child.ui-btn.ui-corner-all(name='comfyButton', data-bind='click: modeComfy') comfy
+        <!-- /ko -->
+        <!-- ko if: $data.getConfig('guiShowTemperatureInput') -->
+        .spinbox.no-carousel-slide
+          input(type='text', data-role='spinbox', name='spin', value='0', min='0', max='100', data-mini='true', step='0.5', data-bind='textInput: inputValue')
+        <!-- /ko -->

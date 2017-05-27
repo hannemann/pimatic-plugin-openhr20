@@ -10,6 +10,11 @@ module.exports = {
         description: "The devices to be synced with this device (comma seperated list of addresses)"
         type: "string",
         default: ""
+      batteryType:
+        description: "change to the used type of batteries"
+        type: "string"
+        enum: ["rechargeable", "non rechargeable"]
+        default: "rechargeable"
       comfyTemp:
         description: "The defined comfy temperature"
         type: "number"
