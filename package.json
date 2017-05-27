@@ -10,7 +10,7 @@
     "LICENSE",
     "app/*"
   ],
-  "version": "0.13.2",
+  "version": "0.13.3",
   "homepage": "https://github.com/OpenHR20",
   "private": false,
   "repository": {

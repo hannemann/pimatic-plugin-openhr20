@@ -139,18 +139,18 @@ module.exports = (env) ->
       
       @attributes.battery = {
         description: "the battery status"
-        type: "number"
-        enum: [80, 64, 48, 32, 16, 0]
+        type: "string"
+        #enum: [100, 80, 64, 48, 32, 16, 0]
         label: ["full", "low"]
         icon:
           noText: true
           mapping: {
-            'icon-battery-fuel-5': 100
-            'icon-battery-fuel-4': 80
-            'icon-battery-fuel-3': 64
-            'icon-battery-fuel-2': 48
-            'icon-battery-fuel-1': 32
-            'icon-battery-empty': 16
+            'icon-battery-fuel-5': "100"
+            'icon-battery-fuel-4': "80"
+            'icon-battery-fuel-3': "64"
+            'icon-battery-fuel-2': "48"
+            'icon-battery-fuel-1': "32"
+            'icon-battery-empty': "16"
           }
       }
       
@@ -205,30 +205,30 @@ module.exports = (env) ->
       battery /= 1000
       if @config.batteryType is "rechargeable"
         if battery > 2.6
-          battery = 100
+          battery = "100"
         else if battery > 2.5
-          battery = 80
+          battery = "80"
         else if battery > 2.45
-          battery = 64
+          battery = "64"
         else if battery > 2.4
-          battery = 48
+          battery = "48"
         else if battery > 2.35
-          battery = 32
+          battery = "32"
         else
-          battery = 16
+          battery = "16"
       else
         if battery > 2.8333333
-          battery = 100
+          battery = "100"
         else if battery > 2.6666666
-          battery = 80
+          battery = "80"
         else if battery > 2.5
-          battery = 64
+          battery = "64"
         else if battery > 2.33333333
-          battery = 48
+          battery = "48"
         else if battery > 2.16666666
-          battery = 32
+          battery = "32"
         else
-          battery = 16
+          battery = "16"
       super(battery)
       
 
