@@ -3,8 +3,6 @@ li.thermostat.openhr20.unsynced {
 }
 li.thermostat span.hint.error {
   color: hsl(360, 100%, 50%);
-  animation: openhr20-error 1s steps(5, start) infinite;
-  -webkit-animation: openhr20-error 2s steps(50, start) infinite;
 }
 li.thermostat span.hint.warn {
   color: hsl(40, 100%, 50%);
@@ -14,16 +12,4 @@ li.thermostat span.hint.warn {
 }
 .openhr20-info {
   height: 30px;
-}
-
-@keyframes openhr20-error {
-  0% {opacity: 1;}
-  50% {opacity: 0;}
-  100% {opacity: 1;}
-}
-
-@-webkit-keyframes openhr20-error {
-  0% {opacity: 1;}
-  50% {opacity: 0;}
-  100% {opacity: 1;}
 }

@@ -177,8 +177,6 @@ module.exports = (env) ->
       @_setSynced(row.synced == 1)
       @_setRealTemperature(row.real/100)
       @_setVoltage(row.battery/1000)
-      @_setError(row.error)
-      @_setErrorLevel(row.error)
       @_setWindow(row.window)
       
       env.logger.debug row.time
@@ -187,9 +185,13 @@ module.exports = (env) ->
         @_setError(@errors.RFM_SYNC)
         @_setErrorLevel(@errors.BAT_W)
       
-      if Date.now() / 1000 - row.time > 20 * 60
+      else if Date.now() / 1000 - row.time > 20 * 60
         @_setError(@errors.RFM_SYNC)
         @_setErrorLevel(@errors.BAT_E)
+        
+      else
+        @_setError(row.error)
+        @_setErrorLevel(row.error)
       
       if @_synced and @_mode == @modes.boost and not @boostTimeout
         env.logger.info "#{@name}: reset in #{@boostDuration} minutes"
