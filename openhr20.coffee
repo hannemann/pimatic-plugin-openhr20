@@ -181,13 +181,13 @@ module.exports = (env) ->
       
       env.logger.debug row.time
       
-      if Date.now() / 1000 - row.time > 8 * 60
-        @_setError(@errors.RFM_SYNC)
-        @_setErrorLevel(@errors.BAT_W)
-      
-      else if Date.now() / 1000 - row.time > 20 * 60
+      if Date.now() / 1000 - row.time > 20 * 60
         @_setError(@errors.RFM_SYNC)
         @_setErrorLevel(@errors.BAT_E)
+      
+      else if Date.now() / 1000 - row.time > 8 * 60
+        @_setError(@errors.RFM_SYNC)
+        @_setErrorLevel(@errors.BAT_W)
         
       else
         @_setError(row.error)
