@@ -140,7 +140,6 @@ module.exports = (env) ->
       @attributes.battery = {
         description: "the battery status"
         type: "string"
-        #enum: [100, 80, 64, 48, 32, 16, 0]
         label: ["full", "low"]
         icon:
           noText: true
@@ -173,8 +172,7 @@ module.exports = (env) ->
       if not @syncValue or @syncValue == 'mode'
         @_setSetpoint(row.wanted/100)
       
-      @_setValve(row.valve)
-        
+      @_setValve(row.valve)        
       @_setBattery(row.battery)
       @_setSynced(row.synced == 1)
       @_setRealTemperature(row.real/100)
@@ -182,6 +180,16 @@ module.exports = (env) ->
       @_setError(row.error)
       @_setErrorLevel(row.error)
       @_setWindow(row.window)
+      
+      env.logger.debug row.time
+      
+      if Date.now() / 1000 - row.time > 8 * 60
+        @_setError(@errors.RFM_SYNC)
+        @_setErrorLevel(@errors.BAT_W)
+      
+      if Date.now() / 1000 - row.time > 20 * 1
+        @_setError(@errors.RFM_SYNC)
+        @_setErrorLevel(@errors.BAT_E)
       
       if @_synced and @_mode == @modes.boost and not @boostTimeout
         env.logger.info "#{@name}: reset in #{@boostDuration} minutes"
