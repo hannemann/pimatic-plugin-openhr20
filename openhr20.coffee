@@ -106,6 +106,7 @@ module.exports = (env) ->
         type: "number"
         acronym: "T"
         unit: "°C"
+        displaySparkline: false
       }
       
       @attributes.voltage = {
@@ -114,6 +115,7 @@ module.exports = (env) ->
         type: "number"
         unit: "V"
         acronym: ""
+        displaySparkline: false
       }
       
       @attributes.window = {
@@ -139,8 +141,9 @@ module.exports = (env) ->
       
       @attributes.battery = {
         description: "the battery status"
-        type: "string"
+        type: "number"
         label: ["full", "low"]
+        displaySparkline: false
         icon:
           noText: true
           mapping: {
