@@ -261,7 +261,6 @@ module.exports = (env) ->
       @emit 'window', window
       
     _setError: (error) ->
-      if @_error is error then return
       if error & @errors.MONTAGE
         error = "Montage"
       else if error & @errors.MOTOR
@@ -275,12 +274,12 @@ module.exports = (env) ->
       else 
         error = ""
         
+      if @_error is error then return
       @_error = error
       @emit 'error', error
       
       
     _setErrorLevel: (error) ->
-      if @_error is error then return
       if error > 0 
         if error & @errors.BAT_W
           errorLevel = "warn"
