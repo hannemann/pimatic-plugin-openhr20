@@ -142,17 +142,18 @@ module.exports = (env) ->
       @attributes.battery = {
         description: "the battery status"
         type: "number"
-        label: ["full", "low"]
         displaySparkline: false
+        unit: "%"
         icon:
           noText: true
           mapping: {
-            'icon-battery-fuel-5': "100"
-            'icon-battery-fuel-4': "80"
-            'icon-battery-fuel-3': "64"
-            'icon-battery-fuel-2': "48"
-            'icon-battery-fuel-1': "32"
-            'icon-battery-empty': "16"
+            'icon-battery-empty' : 0
+            'icon-battery-fuel-1': [0, 20]
+            'icon-battery-fuel-2': [20, 40]
+            'icon-battery-fuel-3': [40, 60]
+            'icon-battery-fuel-4': [60, 80]
+            'icon-battery-fuel-5': [80, 95]
+            'icon-battery-filled': [95, 100.1]
           }
       }
       
@@ -213,34 +214,28 @@ module.exports = (env) ->
     
     _setBattery: (battery) ->
       
-      battery /= 1000
       if @config.batteryType is "rechargeable"
-        if battery > 2.6
-          battery = "100"
-        else if battery > 2.5
-          battery = "80"
-        else if battery > 2.45
-          battery = "64"
-        else if battery > 2.4
-          battery = "48"
-        else if battery > 2.35
-          battery = "32"
-        else
-          battery = "16"
+      
+        # table based on http://lygte-info.dk/review/batteries2012/Eneloop%20AA%20HR-3UTGB%201900mAh%20(White)%20UK.html
+        # discharge with constant power chart
+        if battery > 2560       # full      0-2 minutes
+          battery = 100
+        else if battery > 2440  # 5         2-8 minutes
+          battery = 80
+        else if battery > 2420  # 4         8-16 minutes
+          battery = 70
+        else if battery > 2380  # 3         16-24 minutes
+          battery = 50
+        else if battery > 2300  # 2         24-32 minutes
+          battery = 30
+        else if battery > 2100  # 1         32-39 minutes
+          battery = 15
+        else                    # empty
+          battery = 0
       else
-        if battery > 2.8333333
-          battery = "100"
-        else if battery > 2.6666666
-          battery = "80"
-        else if battery > 2.5
-          battery = "64"
-        else if battery > 2.33333333
-          battery = "48"
-        else if battery > 2.16666666
-          battery = "32"
-        else
-          battery = "16"
-      super(battery)
+        battery = Math.min(100, Math.max(0, (battery - 2000) / 10))
+      
+      super battery
       
 
     _setRealTemperature: (realTemperature) ->
