@@ -123,6 +123,12 @@ module.exports = (env) ->
         description: "The window state"
         type: "string"
         acronym: "W"
+        icon:
+          noText: true
+          mapping: {
+            "icon-window-open"  : "open"
+            "icon-window-closed": "closed"
+          }
       }
       
       @attributes.error = {
@@ -249,7 +255,7 @@ module.exports = (env) ->
       @emit 'voltage', voltage
 
     _setWindow: (window) ->
-      window = if window is 1 then "O" else "C"
+      window = if window is 1 then "open" else "closed"
       if @_window is window then return
       @_window = window
       @emit 'window', window

@@ -13,3 +13,19 @@ li.thermostat span.hint.warn {
 .openhr20-info {
   height: 30px;
 }
+
+#index .attribute-icon.icon-window-open {
+  background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" height="96" width="96" viewBox="0 0 96 96"><g stroke="#000" fill="none" transform="translate(0 -956.36)"><path stroke-width="1px" d="m25.254 995.04z"/><path d="m25.269 976.02v56.093h45.878v-56.093z" stroke="#808080" stroke-width="4" fill="#fff"/><path d="m25.269 976.02-15.233-9.8566v76.344l15.233-10.394z" stroke="#808080" stroke-width="4" fill="#dcdcdc"/><path d="m71.147 976.02 15.054-9.8566v76.344l-15.054-10.394z" stroke="#808080" stroke-width="4" fill="#dcdcdc"/><path d="m25.269 1004.2h-15.233" stroke="#808080" stroke-width="3"/><path d="m71.147 1004.2h15.054" stroke="#808080" stroke-width="3"/></g></svg>');
+  background-repeat: no-repeat;  
+  background-size: 20px 20px;
+  width: 18px;
+  height: 18px;
+}
+
+#index .attribute-icon.icon-window-closed {
+  background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" height="96" width="96" viewBox="0 0 96 96"><g transform="translate(0 -956.36)"><path d="m25.254 995.04z" stroke="#000" stroke-width="1px" fill="none"/><path d="m25.269 976.02v56.093h45.878v-56.093z" fill-rule="evenodd" stroke="#808080" stroke-width="4" fill="#dcdcdc"/><path d="m47.67 976.02v56.093" stroke="#808080" stroke-width="3" fill="none"/><path d="m25.269 1004.2h45.878" stroke="#808080" stroke-width="3" fill="none"/></g></svg>');
+  background-repeat: no-repeat;  
+  background-size: 20px 20px;
+  width: 18px;
+  height: 18px;
+}
