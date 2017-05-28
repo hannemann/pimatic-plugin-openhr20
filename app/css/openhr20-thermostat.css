@@ -15,7 +15,7 @@ li.thermostat span.hint.warn {
 }
 
 #index .attribute-icon.icon-window-open {
-  background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" height="96" width="96" viewBox="0 0 96 96"><g stroke="#000" fill="none" transform="translate(0 -956.36)"><path stroke-width="1px" d="m25.254 995.04z"/><path d="m25.269 976.02v56.093h45.878v-56.093z" stroke="#808080" stroke-width="4" fill="#fff"/><path d="m25.269 976.02-15.233-9.8566v76.344l15.233-10.394z" stroke="#808080" stroke-width="4" fill="#dcdcdc"/><path d="m71.147 976.02 15.054-9.8566v76.344l-15.054-10.394z" stroke="#808080" stroke-width="4" fill="#dcdcdc"/><path d="m25.269 1004.2h-15.233" stroke="#808080" stroke-width="3"/><path d="m71.147 1004.2h15.054" stroke="#808080" stroke-width="3"/></g></svg>');
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20height%3D%2296%22%20width%3D%2296%22%20viewBox%3D%220%200%2096%2096%22%3E%3Cg%20stroke%3D%22%23000%22%20fill%3D%22none%22%20transform%3D%22translate(0%20-956.36)%22%3E%3Cpath%20stroke-width%3D%221px%22%20d%3D%22m25.254%20995.04z%22%2F%3E%3Cpath%20d%3D%22m25.269%20976.02v56.093h45.878v-56.093z%22%20stroke%3D%22%23808080%22%20stroke-width%3D%224%22%20fill%3D%22%23fff%22%2F%3E%3Cpath%20d%3D%22m25.269%20976.02-15.233-9.8566v76.344l15.233-10.394z%22%20stroke%3D%22%23808080%22%20stroke-width%3D%224%22%20fill%3D%22%23dcdcdc%22%2F%3E%3Cpath%20d%3D%22m71.147%20976.02%2015.054-9.8566v76.344l-15.054-10.394z%22%20stroke%3D%22%23808080%22%20stroke-width%3D%224%22%20fill%3D%22%23dcdcdc%22%2F%3E%3Cpath%20d%3D%22m25.269%201004.2h-15.233%22%20stroke%3D%22%23808080%22%20stroke-width%3D%223%22%2F%3E%3Cpath%20d%3D%22m71.147%201004.2h15.054%22%20stroke%3D%22%23808080%22%20stroke-width%3D%223%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
   background-repeat: no-repeat;  
   background-size: 20px 20px;
   width: 18px;
@@ -23,7 +23,7 @@ li.thermostat span.hint.warn {
 }
 
 #index .attribute-icon.icon-window-closed {
-  background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" height="96" width="96" viewBox="0 0 96 96"><g transform="translate(0 -956.36)"><path d="m25.254 995.04z" stroke="#000" stroke-width="1px" fill="none"/><path d="m25.269 976.02v56.093h45.878v-56.093z" fill-rule="evenodd" stroke="#808080" stroke-width="4" fill="#dcdcdc"/><path d="m47.67 976.02v56.093" stroke="#808080" stroke-width="3" fill="none"/><path d="m25.269 1004.2h45.878" stroke="#808080" stroke-width="3" fill="none"/></g></svg>');
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20height%3D%2296%22%20width%3D%2296%22%20viewBox%3D%220%200%2096%2096%22%3E%3Cg%20transform%3D%22translate(0%20-956.36)%22%3E%3Cpath%20d%3D%22m25.254%20995.04z%22%20stroke%3D%22%23000%22%20stroke-width%3D%221px%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22m25.269%20976.02v56.093h45.878v-56.093z%22%20fill-rule%3D%22evenodd%22%20stroke%3D%22%23808080%22%20stroke-width%3D%224%22%20fill%3D%22%23dcdcdc%22%2F%3E%3Cpath%20d%3D%22m47.67%20976.02v56.093%22%20stroke%3D%22%23808080%22%20stroke-width%3D%223%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22m25.269%201004.2h45.878%22%20stroke%3D%22%23808080%22%20stroke-width%3D%223%22%20fill%3D%22none%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E');
   background-repeat: no-repeat;  
   background-size: 20px 20px;
   width: 18px;
