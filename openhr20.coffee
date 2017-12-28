@@ -179,9 +179,8 @@ module.exports = (env) ->
           when @modes.manu.toUpperCase() then @_setMode("manu")
           when @modes.auto.toUpperCase() then @_setMode("auto")
           else @_setMode(@modes.undef)
-      if not @syncValue or @syncValue == 'mode'
-        @_setSetpoint(row.wanted/100)
-      
+          
+      @_setSetpoint(row.wanted/100)
       @_setValve(row.valve)        
       @_setBattery(row.battery)
       @_setSynced(row.synced == 1)
@@ -351,6 +350,8 @@ module.exports = (env) ->
           @plugin.devices[addr].changeTemperatureTo(
             temperatureSetpoint, false
           )
+    
+      if @_temperatureSetpoint is temperatureSetpoint then return
     
       if not @_synced
         oldTemp = @_temperatureSetpoint
