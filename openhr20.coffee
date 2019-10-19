@@ -9,6 +9,7 @@ module.exports = (env) ->
   
     init: (app, @framework, @config) =>
 
+      env.logger.debug(@config.database)
       @db = new sqlite3.Database(@config.database)
       @db.on("error", @dbErrorHandler.bind(this))
       @update_interval = @config.update_interval
@@ -42,25 +43,16 @@ module.exports = (env) ->
     getAttributes: () ->
       limit = @deviceAddrs.length
       addr = @deviceAddrs.join(',')
-      sql = "SELECT *,
-            NOT EXISTS
-              (SELECT * FROM command_queue WHERE addr = log.addr) synced
-            FROM log 
-            WHERE addr IN (#{addr})
-            AND id IN (
-              select id from log
-              order by id desc, addr limit 200
-            )
-            GROUP BY addr;"
-      @db.all(sql, @updateAttributes.bind(this))
+
+      for a in @deviceAddrs
+        sql = "SELECT *, NOT EXISTS (SELECT * FROM command_queue WHERE addr = log.addr) synced FROM log WHERE addr = #{a} ORDER BY id DESC LIMIT 1;"
+        @db.get(sql, @updateDevice.bind(this))
       @
-      
-    updateAttributes: (err, rows) ->
+     
+    updateDevice: (err, row) ->
       if not err
-        for row in rows
-          @devices[row.addr].update(row)
-      @
-      
+        @devices[row.addr].update(row)
+ 
     dbErrorHandler: (err) ->
       env.logger.error("Openhr20: Database error occured", err)
       
